@@ -1,170 +1,76 @@
-// let numbers=[1,2,3,4,5,6];
+// console.log("anyy")
+let postsContaner=document.querySelector("main")
+let tagsContaner=document.querySelector("aside")
 
-// let output=numbers.filter((num)=>{
-//     return num %2 !=0
-// })
-// //console.log(output);
-
-
-// let products=[
-//     {
-//         name:"laptop",
-//         price:1000,
-//         quantity:2,
-//         category:"electronics"
-//     },
-//     {
-//         name: "cap",
-//         price:90,
-//         quantity: 5,
-//         category:"clothes"
-//     },
-//     {
-//         name: "phone",
-//         price: 500,
-//         quantity: 3,
-//         category:"electronics"
-//     },
-//     {
-//         name: "shoes",
-//         price: 200,
-//         quantity: 6,
-//         category:"clothes"
-//     },
-//     {
-//         name: "t-shirt",
-//         price: 500,
-//         quantity: 10,
-//         category:"clothes"
-//     },
-//     {
-//         name: "headphones",
-//         price: 150,
-//         quantity: 8,
-//         category:"electronics"
-//     },
-//     {
-//         name: "jacket",
-//         price: 120,
-//         quantity: 2,
-//         category:"clothes"
-//     },
-//     {
-//         name: "tablet",
-//         price: 300,
-//         quantity: 4,
-//         category:"electronics"
-//     },
-//     {
-//         name: "monitor",
-//         price: 700,
-//         quantity: 1,
-//         category:"electronics"
-//     }
-// ]
-// //      .map(c)
-// products.forEach((ele)=>{
-//     console.log(ele.name);
-//     console.log(ele.quantity);
-// });
-
-// let total=products.filter((ele)=>{
-//     return ele.category=="clothes";
-// }).reduce(function(sum,c){
-//     return sum + c.price
-// },0)
-
-// console.log(`total = ${total}`);
-console.log("anyy")
-let productsContaner=document.querySelector(".products-container")
-let total=document.querySelector(".count")
-
-function getData(url){
-let r= new XMLHttpRequest();
-r.onload=()=>{
-    productsContaner.innerHTML=""
-    total.innerHTML=""
-if(r.readyState==4 && r.status==200){
-    let data=JSON.parse(r.responseText);
-    let product= data.products;
-    console.log(product);
-    console.log(data);
-    total.innerHTML+= data.total;
-
-    product.forEach((ele)=> {
-        productsContaner.innerHTML+=`
-    <div class="products-container">
-        <div class="product-card">
-            <img class="product-img" src="${ele.thumbnail}" alt="">
-            <div class="data">
-                <h3 class="title">
-                    ${ele.title} 
-                </h3>
-
-                <p class="description">
-                ${ele.description}                  
-                </p>
-
-                <p class="price">
-                    price : <span class="value">${ele.price} </span> $
-                </p>
-
-                <div class="btns">
-                    <button class="add-btn">
-                        <i class="fa-solid fa-cart-shopping"></i>  add to cart
-                    </button>
-                    <button class="view-btn">
-                        <i class="fa-solid fa-eye"></i>  view
-                    </button>
+function getPosts(url){
+    let response= new XMLHttpRequest();
+    response.onload=function(){
+        if(response.readyState==4 && response.status==200){
+            postsContaner.innerHTML="";
+            let data=JSON.parse(response.responseText);
+            let posts= data.posts;
+            // console.log(data);
+            // console.log(posts);
+            posts.forEach(e => {
+                let tag = e.tags.map((t)=>`<span class="tag">#${t}</span>`);
+                
+                postsContaner.innerHTML+=`
+                <div class="post-card">
+                    <h2>${e.title}</h2>
+                    <p>${e.body}</p>
+                    <p class="post-tag">${tag.join(" ")}</p>
+                    <div class="reacts">
+                        <span class="eye"><i class="fa-solid fa-eye"></i>${e.views}</span>
+                        <span class="heart"><i class="fa-solid fa-heart"></i>${e.reactions.likes}</span>
+                        <span class="thumbs-down"><i class="fa-solid fa-thumbs-down"></i>${e.reactions.dislikes}</span></div>
                 </div>
-            </div>
-        </div>
-    </div>
-    `
-    });
-    
-
-}else{
-    console.log("error 404");
+                `
+            });
+    }else{
+        console.log("error 404");
+    }
+    }
+    response.open("GET",url,true);
+    response.send();
 }
-}
-r.open("GET",url,true);
-r.send();
+function gettags(url){
+    let response= new XMLHttpRequest();
+    response.onload=function(){
+        if(response.readyState==4 && response.status==200){
+            tagsContaner.innerHTML="";
+            let tags=JSON.parse(response.responseText);
+            //console.log(tags);
+            tags.forEach(e => {                
+                tagsContaner.innerHTML+=`
+                <button class="tag-button" onclick="hashTag('${e.slug}')">#${e.slug}</button>
+                `
+            });
+    }else{
+        console.log("error 404");
+    }
+    }
+    response.open("GET",url,true);
+    response.send();
 }
 
-let baiseLink="https://dummyjson.com/products"
-let categoryLink="https://dummyjson.com/products/categories"
-getData(baiseLink);
-
+let baseLink = "https://dummyjson.com/posts";
+let tagLink="https://dummyjson.com/posts/tags"
+getPosts(baseLink);
+gettags(tagLink)
 //--------------------------------
-let select=document.querySelector("select")
-let cr= new XMLHttpRequest();
-cr.onload=()=>{
-if(cr.readyState==4 && cr.status==200){
-    let response=JSON.parse(cr.responseText);
-    console.log(response);
 
-    response.forEach((ele)=> {
-    select.innerHTML+=`
-    <option value='${ele.url}'>${ele.name}</option>
-    `
-    });
-    
-
-}else{
-    console.log("error 404");
-}
-}
-cr.open("GET",categoryLink,true);
-cr.send();
-
-select.addEventListener("change",(e)=>{
-    getData(e.target.value);
-})
 //--------------------------------
 let search=document.querySelector(".search")
 
 search.addEventListener("input",()=>{
-let newLink=`https://dummyjson.com/products/search?q=${search.value}`
-    getData(newLink);
+let newLink=`https://dummyjson.com/posts/search?q=${search.value}`
+    getPosts(newLink);
 })
+
+function hashTag(e){
+    let newLink=`https://dummyjson.com/posts/tag/${e}`
+    getPosts(newLink);
+}
+
+
+// // --------------------------------------------------------
